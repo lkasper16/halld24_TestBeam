@@ -31,8 +31,8 @@
 //#define WRITE_CSV
 #define SAVE_PDF
 //-- For single evt clustering display, uncomment BOTH:
-//#define SHOW_EVT_DISPLAY
-//#define SHOW_EVTbyEVT
+#define SHOW_EVT_DISPLAY
+#define SHOW_EVTbyEVT
 
 void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, float v5) {
   csvFile<<v1<<","<<v2<<","<<v3<<","<<v4<<","<<v5<<std::endl;
@@ -147,6 +147,10 @@ void trdclass_halld24::Loop() {
   int nx0=100;       int ny0=528;
   double Ymin=0.;    double Ymax=528.;
   double Xmin=0.;    double Xmax=30.;
+
+  // int nx0=100;       int ny0=150;
+  // double Ymin=250.;    double Ymax=300.0;
+  // double Xmin=20.;    double Xmax=30.;
   hevt  = new TH2F("hevt"," Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
   hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);
   hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);
@@ -298,6 +302,8 @@ void trdclass_halld24::Loop() {
       int gemChanX = GetGEMXChan(fADCChan, fADCSlot);
       int gemChanY = GetGEMYChan(fADCChan, fADCSlot);
       
+
+      // store gem timing and track information
       if (gemChanY>-1 && amp>THRESH) {
         if (gem_yamp_max<amp) {
           gem_yamp_max=amp;
@@ -306,7 +312,7 @@ void trdclass_halld24::Loop() {
         }
         gem_ytime[nypulse]=time;
         nypulse++;
-        f125_fit->Fill(time,gemChanY,amp);
+        f125_fit->Fill(time,gemChanY,amp); //only has two entries maybe should adjust the threshold
       }
       if (gemChanX>-1 && amp>THRESH) {
         if (gem_xamp_max<amp) {
@@ -326,9 +332,12 @@ void trdclass_halld24::Loop() {
         
         float peak_amp = f125_pulse_peak_amp->at(i);
         float ped = f125_pulse_pedestal->at(i);
+
+        // selection based on peak_amp - ped
         if (0 > ped || ped > 200 ) ped = 100;
         float amp = peak_amp-ped;
         if (amp<0) amp=0;
+
         float time = f125_pulse_peak_time->at(i);
         int fADCSlot = f125_pulse_slot->at(i);
         int fADCChan = f125_pulse_channel->at(i);
@@ -338,6 +347,7 @@ void trdclass_halld24::Loop() {
         if (gemChanY>-1 && amp>THRESH) {
           bool tcoin=false;
           for (int it=0;it<nxpulse;it++) {
+            // look for coincidence abs(fadc_time - gem_xtime) < 5
             if (abs(time-gem_xtime[it])<5) tcoin=true;
           }
           if (tcoin)f125_yamp2d->Fill(time,gemChanY,amp);
@@ -573,13 +583,19 @@ void trdclass_halld24::Loop() {
         double binx = (xma-xmi)/nx;      double biny = (yma-ymi)/ny;
         double THR2 = 1.2;
         
+        // scan BinContent of hp = hevt
         for (int ix=0; ix<nx; ix++) {  //-------------------- clustering loop ------------------------------------
   	      for (int iy=0; iy<ny; iy++) {
+
       	    double c1 = hpc->GetBinContent(ix,iy);   // hpc->SetBinContent(ix,iy,5.);         // energy
+
+            // find bin center for x,y
       	    double x1=double(ix)/double(nx)*(xma-xmi)+xmi-binx/2.;    // drift time
       	    double y1=double(iy)/double(ny)*(yma-ymi)+ymi-biny/2.;    // X strip
             
       	    if (c1<THR2) continue;
+
+            // first iteration if c1 > threshold, set clust_Xpos and clust_Zpos
       	    if (nclust==0) {
       	      clust_Xpos[nclust]=y1; clust_Ypos[nclust]=0; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
       	      clust_Width[nclust][0]=y1;   	clust_Width[nclust][1]=y1;   	clust_Width[nclust][2]=0;
@@ -588,19 +604,28 @@ void trdclass_halld24::Loop() {
       	    }
             
         	  int added=0;
+            
         	  for (int k=0; k<nclust; k++) {
         	    double dist=sqrt(pow((y1-clust_Xpos[k]),2.)+pow((x1-clust_Zpos[k]),2.)); //--- dist hit to clusters
-        	    if (dist<CL_DIST) {
+        	    // check the distance from the x1,y1 to the center of the cluster based on the radius (2.7 mm)
+              if (dist<CL_DIST) {
+                // if it's within the radius set this as a new position using weighted average to approximate the new central position
         	      clust_Xpos[k]=(y1*c1+clust_Xpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new X pos
         	      clust_Zpos[k]=(x1*c1+clust_Zpos[k]*clust_dEdx[k])/(c1+clust_dEdx[k]);  //--  new Z pos
+                // new dedx is the sum of the two weighted averaged amplitude
         	      clust_dEdx[k]=c1+clust_dEdx[k];  // new dEdx
+                // add cluster size
         	      clust_Size[k]=1+clust_Size[k];  // clust size in pixels
+
+                // update cluster width in x and y
         	      if (y1<clust_Width[k][0]) clust_Width[k][0]=y1; if (y1>clust_Width[k][1]) clust_Width[k][1]=y1; clust_Width[k][2]=clust_Width[k][1]-clust_Width[k][0];
         	      if (x1<clust_Length[k][0]) clust_Length[k][0]=x1;if (x1>clust_Length[k][1]) clust_Length[k][1]=x1;clust_Length[k][2]=clust_Length[k][1]-clust_Length[k][0];
         	      hpc->SetBinContent(ix,iy,k+1.);
         	      added=1; break;
         	    }
         	  }
+
+            // if it's outside the radius, set this as a new center
         	  if (added==0) {
         	    if (nclust+1>=MAX_CLUST) continue;
         	    clust_Xpos[nclust]=y1; clust_Ypos[nclust]=0; clust_Zpos[nclust]=x1;  clust_dEdx[nclust]=c1;  clust_Size[nclust]=1;
@@ -696,6 +721,7 @@ void trdclass_halld24::Loop() {
           for (int i = 0; i < nhits; i++)  { TRACKS_N[i] = 0;  }
           std::vector<float> xz(2,0);
           
+          // 
           for (int i2 = 0; i2 < nhits; i2++) {
         	  int num =  tracks[i2];
         	  int num2 = std::max(0, std::min(num, nhits - 1));
@@ -728,6 +754,7 @@ void trdclass_halld24::Loop() {
             mg->SetTitle(" ML-FPGA response; z pos,mm; y pos,mm ");
             NTRACKS=0;
             double p0,p1;
+            // look for tracks
             for (int i2 = 1; i2 < nhits; i2++) {  // tracks loop; zero track -> noise
               
       	      if (TRACKS_N[i2]<2) continue;   //---- select 2 (x,z) and more hits on track ----
