@@ -160,6 +160,7 @@ public :
    vector<double>  *gem_peak_real_pos;
 
    // List of branches
+   //============== SRS Raw Data Variables ===============
    TBranch        *b_srs_raw_count;   //!
    TBranch        *b_srs_raw_roc;   //!
    TBranch        *b_srs_raw_slot;   //!
@@ -170,6 +171,7 @@ public :
    TBranch        *b_srs_raw_samples_index;   //!
    TBranch        *b_srs_raw_samples_count;   //!
    TBranch        *b_srs_raw_samples;   //!
+   //============== fADC125 Raw Data Variables ===============
    TBranch        *b_f125_wraw_count;   //!
    TBranch        *b_f125_wraw_roc;   //!
    TBranch        *b_f125_wraw_slot;   //!
@@ -180,6 +182,7 @@ public :
    TBranch        *b_f125_wraw_samples_index;   //!
    TBranch        *b_f125_wraw_samples_count;   //!
    TBranch        *b_f125_wraw_samples;   //!
+   //============== fADC250 Raw Data Variables ===============
    TBranch        *b_f250_wraw_count;   //!
    TBranch        *b_f250_wraw_roc;   //!
    TBranch        *b_f250_wraw_slot;   //!
@@ -190,6 +193,7 @@ public :
    TBranch        *b_f250_wraw_samples_index;   //!
    TBranch        *b_f250_wraw_samples_count;   //!
    TBranch        *b_f250_wraw_samples;   //!
+   //============== fADC125 Pulse Data Variables ===============
    TBranch        *b_f125_pulse_count;   //!
    TBranch        *b_f125_pulse_roc;   //!
    TBranch        *b_f125_pulse_slot;   //!
@@ -214,6 +218,7 @@ public :
    TBranch        *b_f125_pulse_integral_emulated;   //!
    TBranch        *b_f125_pulse_peak_amp_emulated;   //!
    TBranch        *b_f125_pulse_peak_time_emulated;   //!
+   //============== fADC250 Pulse Data Variables ===============
    TBranch        *b_f250_pulse_count;   //!
    TBranch        *b_f250_pulse_roc;   //!
    TBranch        *b_f250_pulse_slot;   //!
@@ -243,6 +248,7 @@ public :
    TBranch        *b_f250_pulse_fine_time_emulated;   //!
    TBranch        *b_f250_pulse_pulse_peak_emulated;   //!
    TBranch        *b_f250_pulse_qf_emulated;   //!
+   //============== SRS Cluster (Pulse?) Data Variables ===============
    TBranch        *b_gem_scluster_count;   //!
    TBranch        *b_gem_scluster_x;   //!
    TBranch        *b_gem_scluster_y;   //!
@@ -261,7 +267,7 @@ public :
    TBranch        *b_gem_peak_area;   //!
    TBranch        *b_gem_peak_real_pos;   //!
 
-   trdclass_halld24(int RunNum, int MaxEvt, int FirstEvt);
+   trdclass_halld24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
    virtual ~trdclass_halld24();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -276,8 +282,9 @@ public :
    void Count(const char *tit, double cut1, double cut2);
    
    //==================  histograms ========================
-
+  
    int RunNum;
+   int FileNum;
    Long64_t MaxEvt;
    Long64_t FirstEvt;
    TH1F *h250_size;
@@ -285,13 +292,13 @@ public :
    TH1D *hNTracks, *hNTracks_e;
     TH1F *gem_trk_fit_integral;
 
-   TH1F *hgemtrkr_x;
-   TH1F *hgemtrkr_y;
-   TH1F *hgemtrkr_max_x;
-   TH1F *hgemtrkr_2_max_x;
-   TH1F *hgemtrkr_peak_x, *hgemtrkr_2_peak_x;
-   TH1F *hgemtrkr_peak_y, *hgemtrkr_2_peak_y;
-   TH2F *hgemtrkr_double_x, *hgemtrkr_double_y, *hgemtrkr_peak_xy, *hgemtrkr_2_peak_xy, *hgemtrkr_ch_xy, *hgemtrkr_peak_xy_chi2, *srs_gemtrd_el, *srs_etrd_beam, *srs_etrd_ratio;
+   TH1F *hgemtrkr1_x;
+   TH1F *hgemtrkr1_y;
+   TH1F *hgemtrkr1_max_x;
+   TH1F *hgemtrkr2_max_x;
+   TH1F *hgemtrkr1_peak_x, *hgemtrkr2_peak_x;
+   TH1F *hgemtrkr1_peak_y, *hgemtrkr2_peak_y;
+   TH2F *hgemtrkr_double_x, *hgemtrkr_double_y, *hgemtrkr1_peak_xy, *hgemtrkr2_peak_xy, *hgemtrkr1_ch_xy, *hgemtrkr1_peak_xy_chi2, *srs_gemtrd_el, *srs_etrd_beam, *srs_etrd_ratio;
    TH1F *f125_el_x, *f125_el_y, *f125_el_Xmax, *f125_el_Ymax, *f125_el_xch_max, *f125_el_ych_max, *f125_el_chi2, *f125_el_fita;
    TH2F *f125_xamp2d, *f125_yamp2d, *f125_el_Yraw, *f125_el_evt_display, *f125_el_Xraw, *f125_el_fit, *f125_fit, *f125_el_clu2d;
    
@@ -316,16 +323,31 @@ public :
    std::vector <float> clu_dedx;
    std::vector <float> clu_width;
    TH1F *gem_zHist;
+   std::vector <int> gem_xch_max;
+   std::vector <int> gem_ych_max;
    std::vector <float> gem_xamp_max;
    std::vector <float> gem_yamp_max;
    std::vector <float> gem_xtime_max;
    std::vector <float> gem_ytime_max;
    std::vector <float> chi2cc_gem;
+   std::vector <float> chi2nn_gem;
    std::vector <float> gem_integral;
    std::vector <float> a0;
    std::vector <float> a1;
-   std::vector <float> gem_xch_max;
-   std::vector <float> gem_ych_max;
+   std::vector <float> a0nn;
+   std::vector <float> a1nn;
+   std::vector <int> gemtrkr_xch_max;
+   std::vector <int> gemtrkr_ych_max;
+   std::vector <int> gemtrkr_2_xch_max;
+   std::vector <int> gemtrkr_2_ych_max;
+   std::vector <float> gemtrkr_xamp_max;
+   std::vector <float> gemtrkr_yamp_max;
+   std::vector <float> gemtrkr_2_xamp_max;
+   std::vector <float> gemtrkr_2_yamp_max;
+   std::vector <int> nxtrkr1; 
+   std::vector <int> nytrkr1;
+   std::vector <int> nxtrkr2;
+   std::vector <int> nytrkr2;
    
    //=============================================
 };
@@ -333,21 +355,42 @@ public :
 #endif
 
 #ifdef trdclass_halld24_cxx
-trdclass_halld24::trdclass_halld24(int RunNum_in, int MaxEvt_in=0, int FirstEvt_in=0) : fChain(0)
+trdclass_halld24::trdclass_halld24(int RunNum_in, int MaxEvt_in=0, int FirstEvt_in=0, int FileNum_in=-1) : fChain(0)
 {
   RunNum=RunNum_in;
   MaxEvt=MaxEvt_in;
   FirstEvt=FirstEvt_in;
+  FileNum=FileNum_in;
   TTree *tree=NULL;
+  
+  printf("====== trdclass constructor Run=%d File=%d  ============\n",RunNum,FileNum);
+
+  TChain* chain;
+  char chainFiles[128];
+  
+  if (FileNum<0.) {
+    sprintf(chainFiles,"ROOT/Run_%06d_*.root",RunNum);
+    chain = new TChain("events");
+    printf("Chaining data files into TTree chain for Run %d \n",RunNum);
+    chain->Add(chainFiles);
+    //chain->Print();
+    tree=chain;
+  }
+  
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-   if (tree == 0) {
+  if (tree == 0) {
      char FileName[128];
-     sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
+     sprintf(FileName,"ROOT/Run_%06d_%03d.root",RunNum,FileNum);
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
       if (!f || !f->IsOpen()) {
          f = new TFile(FileName);
-      }
+       printf("---> Open file = %s \n",FileName);
+     } else {
+       sprintf(FileName,"ROOT/Run_%06d.root",RunNum);
+       f = (TFile*)gROOT->GetListOfFiles()->FindObject(FileName);
+       printf("---> Open file = %s \n",FileName);
+      }   
       f->GetObject("events",tree);
    }
    Init(tree);
