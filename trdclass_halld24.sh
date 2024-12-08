@@ -2,7 +2,7 @@
 
 
 #source setup_env.sh
-source /gapps/root/Linux_RHEL7-x86_64-gcc4.8.2/root-6.18.00/bin/thisroot.csh
+# source /gapps/root/Linux_RHEL7-x86_64-gcc4.8.2/root-6.18.00/bin/thisroot.sh
 # only root needed
 
 RUNNUM=${1-none}
