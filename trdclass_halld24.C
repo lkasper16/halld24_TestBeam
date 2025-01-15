@@ -31,8 +31,8 @@
 //#define WRITE_CSV
 #define SAVE_PDF
 //-- For single evt clustering display, uncomment BOTH:
-//#define SHOW_EVT_DISPLAY
-//#define SHOW_EVTbyEVT
+#define SHOW_EVT_DISPLAY
+#define SHOW_EVTbyEVT
 
 void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, float v5) {
   csvFile<<v1<<","<<v2<<","<<v3<<","<<v4<<","<<v5<<std::endl;
@@ -51,6 +51,7 @@ void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, 
 #define last_slot 8
 #define last_ch 71
 
+// Functions return X,Y position
 int GetGEMXChan(int fch, int slot) {
   int sl=slot-first_slot;
   if((sl>=gem_x_slot&&sl<gem_y_slot)||(sl==gem_y_slot&&fch<gem_y_ch0)) {
@@ -144,9 +145,13 @@ void trdclass_halld24::Loop() {
     TCanvas *c2 = new TCanvas("FPGA",c2Title,1000,100,1500,1300);
     c2->Divide(3,2); c2->cd(1);
   #endif
-  int nx0=100;       int ny0=528;
-  double Ymin=0.;    double Ymax=528.;
-  double Xmin=0.;    double Xmax=30.;
+  // int nx0=100;       int ny0=528;
+  // double Ymin=0.;    double Ymax=528.;
+  // double Xmin=0.;    double Xmax=30.;
+
+    int nx0=100;       int ny0=150;
+  double Ymin=250.;    double Ymax=300.;
+  double Xmin=20.;    double Xmax=30.;
   hevt  = new TH2F("hevt"," Event display; z pos,mm; y pos,mm ",nx0,Xmin,Xmax,ny0,Ymin,Ymax); hevt->SetStats( 0 ); hevt->SetMaximum(10.);
   hevtc = new TH2F("hevtc"," Clustering ; FADC bins; GEM strips",nx0,-0.5,nx0-0.5,ny0,-0.5,ny0-0.5);
   hevtc->SetStats(0);   hevtc->SetMinimum(0.07); hevtc->SetMaximum(40.);

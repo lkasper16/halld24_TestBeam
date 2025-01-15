@@ -9,7 +9,6 @@ int halld24_analysis(){
     TFile* file = LoadRootFile(filename);
     if (file == NULL) return 1;
 
-    
     TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
     TString h1_name = "f125_el_Ymax";
