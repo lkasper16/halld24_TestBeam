@@ -296,7 +296,7 @@ public :
    TH1F *hgemtrkr1_y;
    TH1F *hgemtrkr1_max_x;
    TH1F *hgemtrkr2_max_x;
-   TH1F *hgemtrkr1_peak_x, *hgemtrkr2_peak_x;
+   TH1F *hgemtrkr1_peak_x, *hgemtrkr2_peak_x, *hgemtrkr_peak_delta_x;
    TH1F *hgemtrkr1_peak_y, *hgemtrkr2_peak_y;
    TH2F *hgemtrkr_double_x, *hgemtrkr_double_y, *hgemtrkr1_peak_xy, *hgemtrkr2_peak_xy, *hgemtrkr1_ch_xy, *hgemtrkr1_peak_xy_chi2, *srs_gemtrd_el, *srs_etrd_beam, *srs_etrd_ratio;
    TH1F *f125_el_x, *f125_el_y, *f125_el_Xmax, *f125_el_Ymax, *f125_el_xch_max, *f125_el_ych_max, *f125_el_chi2, *f125_el_fita;

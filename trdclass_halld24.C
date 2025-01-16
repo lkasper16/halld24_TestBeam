@@ -32,8 +32,8 @@
 #define SAVE_PDF
 
 //-- For single evt clustering display, uncomment BOTH:
-//#define SHOW_EVT_DISPLAY
-//#define SHOW_EVTbyEVT
+// #define SHOW_EVT_DISPLAY
+// #define SHOW_EVTbyEVT
 
 void WriteToCSV(std::ofstream &csvFile, float v1, float v2, float v3, float v4, float v5) {
   csvFile<<v1<<","<<v2<<","<<v3<<","<<v4<<","<<v5<<std::endl;
@@ -75,6 +75,16 @@ int GetTrackerChan(int chn) {
   int apvch=127-(chn-apvn*128);
   int ch = apvch+128*apvn;
   return ch;
+}
+
+double GetTrackersDeltaX(double GEMTrkX1, double GEMTrkX2) {
+  double p0 = -40.8951;
+  double p1 = 1.28738;
+
+  double deltaX1 = GEMTrkX1 - (GEMTrkX2-p0)/p1;
+  double deltaX2 = GEMTrkX2 - (p0 + p1*GEMTrkX1);
+
+  return std::sqrt(deltaX1*deltaX1 + deltaX2*deltaX2);
 }
 
 //=========== End Detector Channel Mapping =============
@@ -139,6 +149,7 @@ void trdclass_halld24::Loop() {
   hgemtrkr1_peak_y = new TH1F("hgemtrkr1_peak_y"," GEM-TRKR1 Pulse Distribution in Y ; Y [mm] ",128,-0.5,127.5);
 	hgemtrkr2_peak_x = new TH1F("hgemtrkr2_peak_x"," GEM-TRKR2 Pulse Distribution in X ; X [mm] ",512,-0.5,511.5);
   hgemtrkr2_peak_y = new TH1F("hgemtrkr2_peak_y"," GEM-TRKR2 Pulse Distribution in Y ; Y [mm] ",128,-0.5,127.5);
+  hgemtrkr_peak_delta_x = new TH1F("hgemtrkr_peak_delta_x"," GEM-TRKR1 & GEM-TRKR2 Delta X; Delta X [mm] ",41,-0.5,40.5);
   
   //-- LUBOMIR'S Track Matching Histograms
   TH1F *thits = new TH1F("thits","",528.,-0.5,527.5);
@@ -201,7 +212,8 @@ void trdclass_halld24::Loop() {
   int gem_ytime_max;
   ULong64_t gt1_idx_x, gt1_idx_y;
   ULong64_t gt2_idx_x, gt2_idx_y;
-  
+  double GEMTrkrsDeltaX;
+
   //=================================================================
   //  Create GEM-TRD TTree of Hit Info for NN Rej Factor Calculation
   //=================================================================
@@ -249,6 +261,7 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM->Branch("a0nn",&a0nn);
     EVENT_VECT_GEM->Branch("a1nn",&a1nn);
     EVENT_VECT_GEM->Branch("ntr",&NTRACKS,"NTRACKS/I");
+    EVENT_VECT_GEM->Branch("GEMTrkrsDeltaX",&GEMTrkrsDeltaX, "GEMTrkrsDeltaX/F");
   #endif
   
   //==============================================================================
@@ -378,7 +391,11 @@ void trdclass_halld24::Loop() {
         }
 				if (gt2_idx_x>0) {
         	for (ULong64_t i=0; i<gt2_idx_x; i++) {
-          	hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
+            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
+            if (GEMTrkrsDeltaX < 4.0) {
+              hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
+              hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
+            }
         	}
         }
       }
