@@ -213,6 +213,7 @@ void trdclass_halld24::Loop() {
   ULong64_t gt1_idx_x, gt1_idx_y;
   ULong64_t gt2_idx_x, gt2_idx_y;
   double GEMTrkrsDeltaX;
+  const double GEMTrkrsDeltaXCut = 4.0;
 
   //=================================================================
   //  Create GEM-TRD TTree of Hit Info for NN Rej Factor Calculation
@@ -353,7 +354,6 @@ void trdclass_halld24::Loop() {
     
     for (ULong64_t i=0; i<gem_peak_count; i++) { //-- SRS Pulse Peak Info Loop
       //-- Match SRS info to correct detectors and detector planes
-
       //-- GEM Tracker 1
       if (gem_peak_plane_name->at(i) == "GEMTR1Y") {
         gemtrkr1_peak_pos_y[gt1_idx_y] = GetTrackerChan(gem_peak_index->at(i));
@@ -375,6 +375,19 @@ void trdclass_halld24::Loop() {
         gt2_idx_x++;
 			}
     } //-- End SRS Peak Loop
+
+    // reject noise using trackers correlation
+    if (gt1_idx_x==1 && gt2_idx_x==1) {
+      GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
+      if (GEMTrkrsDeltaX > GEMTrkrsDeltaXCut) {
+        gt1_idx_x = 0;
+        gt2_idx_x = 0;
+      }
+    }
+    else {
+      gt1_idx_x = 0;
+      gt2_idx_x = 0;
+    }
     
     //-- Fill GEMTracker Histos
     if (gt1_idx_x>0) {
@@ -391,11 +404,8 @@ void trdclass_halld24::Loop() {
         }
 				if (gt2_idx_x>0) {
         	for (ULong64_t i=0; i<gt2_idx_x; i++) {
-            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
-            if (GEMTrkrsDeltaX < 4.0) {
-              hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
-              hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
-            }
+            hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
+            hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
         	}
         }
       }
