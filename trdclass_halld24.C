@@ -162,12 +162,42 @@ void trdclass_halld24::Loop() {
   //TH1F *thits2 = new TH1F("thits2","",512.,-0.5,511.5);
   //TH1F *tnohits2 = new TH1F("tnohits2","",512.,-0.5,511.5);
   //TH1F *teff2 = new TH1F("teff2","",512.,-0.5,511.5);
-  float x1=2057.4+10.;
-  float x2=2654.3+10.;
-  float x3=4749.8+10.;
-  float dy1=104.8+20.;
-  float dy2=172.5+20.;
-  float dy3=202.;  
+  // float x1=2057.4+10.;
+  // float x2=2654.3+10.;
+  // float x3=4749.8+10.;
+  // float dy1=104.8+20.;
+  // float dy2=172.5+20.;
+  // float dy3=202.;
+
+  
+  // Detectors coordinate from Survey
+
+  float y0=80.59990;
+  float v0=104.69986;
+  float x0=386.76755;
+
+  float y1=(81.18291+80.72291)/2.;
+  float v1=(104.76201+104.76228)/2.;
+  float x1=(388.82626+388.83477)/2.;
+
+  float y2=(81.25059+80.79095)/2.;
+  float v2=(104.76775+104.77306)/2.;
+  float x2=(389.41947+389.43687)/2.;
+
+  float y3=(81.32000+80.77612+81.32446+80.78202)/4.;
+  float v3=(105.11588+105.11209+104.38180+104.37675)/4.;
+  float x3=(391.54396+391.53969+391.54030+391.53604)/4.;
+
+  float Bl = 1.6617 * 36*0.0254; // 1.6T x 36" field integral
+
+
+  float dx1=(x1-x0)*1000.;
+  float dy1=(y1-y0)*1000.-256.*0.8-31.75; 
+  float dx2=(x2-x0)*1000.;
+  float dy2=(y2-y0)*1000.-256.*0.8-31.75-2.4;
+  float dx3=(x3-x0)*1000.+31.35;
+  float dy3=(y3-y0)*1000.-264.;  
+
   
   //-- Clustering and track finding histos
   gErrorIgnoreLevel = kBreak; // Suppress warning messages from empty chi^2 fit data
@@ -214,6 +244,10 @@ void trdclass_halld24::Loop() {
   ULong64_t gt2_idx_x, gt2_idx_y;
   double GEMTrkrsDeltaX;
   const double GEMTrkrsDeltaXCut = 9999999;
+  double extrp_y;
+  vector<double> v_trd_y;
+  vector<bool> v_trk_xtime_coincidence;
+  vector<bool> v_trk_ytime_coincidence;
 
   //=================================================================
   //  Create GEM-TRD TTree of Hit Info for NN Rej Factor Calculation
@@ -269,6 +303,13 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM_TRACKERS->SetName("gem_trackers_hits");
     EVENT_VECT_GEM_TRACKERS->SetTitle("GEM Trackers TTree with single track hit info");
     EVENT_VECT_GEM_TRACKERS->SetDirectory(fHits);
+    EVENT_VECT_GEM_TRACKERS->Branch("GEMTrkrNHitMatch",&gem_trk_hit);
+    // TRD hit position extrappolated from GEM Trackers
+    EVENT_VECT_GEM_TRACKERS->Branch("extrp_y", &extrp_y);
+    // TRD hit position relative to the beam line
+    EVENT_VECT_GEM_TRACKERS->Branch("v_trd_y", &v_trd_y);
+    EVENT_VECT_GEM_TRACKERS->Branch("trk_xtime_coincidence", &v_trk_xtime_coincidence);
+    EVENT_VECT_GEM_TRACKERS->Branch("trk_ytime_coincidence", &v_trk_ytime_coincidence);
   #endif
   
   //==============================================================================
@@ -319,7 +360,11 @@ void trdclass_halld24::Loop() {
     gem_xamp_max =-1;
     gem_xch_max=-1;
     gem_xtime_max=-1;
-    int gem_trk_hit=0;
+    gem_trk_hit=0;
+    extrp_y=0;
+    v_trd_y.clear();
+    v_trk_xtime_coincidence.clear();
+    v_trk_ytime_coincidence.clear();
     
     int gem_xtime[f125_pulse_count];
     int gem_ytime[f125_pulse_count];
@@ -538,6 +583,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
       float a=(y2-y1)/(x2-x1);
       float b=((y1)*x2-(y2)*x1)/(x2-x1);
       float extr = a*x3+b; //-- Track extrapolation line
+      extrp_y = extr;
       thits->Fill(extr-dy3);
       bool match = false;
       bool match2d = false;
@@ -558,6 +604,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
       if (gemChanY>-1 && amp>THRESH ) {
         gem_trk_hit=0;
         float y3=dy3+gemChanY;
+        v_trd_y.push_back(y3);
         f125_ydiff2d->Fill(time,y3-extr+a*(time-45)*0.3);
         if (abs(y3-extr)<20) { //-- if actual hit location & track extrapolation difference is within 20 mm
           Count("gem_trk_hit");
@@ -565,6 +612,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
           for (int it=0; it<nxpulse; it++){
             if (abs(time-gem_xtime[it])<10) tcoin=true; //-- if time between hits is less than 10 time samples, time coincidence is TRUE
           }
+          v_trk_ytime_coincidence.push_back(tcoin);
           if (!match) {
             teff->Fill(extr-dy3);
             match = true;
@@ -587,6 +635,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
         for (int it=0; it<nypulse; it++){
           if (abs(time-gem_ytime[it])<5) tcoin=true;
         }
+        v_trk_xtime_coincidence.push_back(tcoin);
         if (tcoin) {
           f125_xamp2d->Fill(time,gemChanX,amp);
           f125_el_Xmax->Fill(gem_xamp_max);

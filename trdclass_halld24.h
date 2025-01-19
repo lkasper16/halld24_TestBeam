@@ -313,7 +313,8 @@ public :
    int gem_nhit;
    int trkr_hit;
    int clu_nhit;
-   
+   int gem_trk_hit;
+
    std::vector <int> gem_xpos;
    std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
