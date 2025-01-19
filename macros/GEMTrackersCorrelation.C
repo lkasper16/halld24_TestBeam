@@ -21,7 +21,7 @@ vector<Double_t> GetLinearFitParameters(TH2F *h2, Double_t xmin, Double_t xmax, 
         Double_t X1 = x + step/2;
         g->SetPoint(g->GetN(), X1, X2);
     }
-    // Print g
+
     TCanvas *c1 = new TCanvas("c1", "c1", 800, 600);
     g->Draw("AP");
 
@@ -33,7 +33,6 @@ vector<Double_t> GetLinearFitParameters(TH2F *h2, Double_t xmin, Double_t xmax, 
     fitParams.push_back(f1->GetParameter(0));
     fitParams.push_back(f1->GetParameter(1));
 
-    // Save the canvas
     // g->SaveAs("GEMTrackersCorrelation.pdf");
     return fitParams;   
 }
