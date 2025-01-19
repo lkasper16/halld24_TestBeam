@@ -360,6 +360,7 @@ void trdclass_halld24::Loop() {
     gem_xamp_max =-1;
     gem_xch_max=-1;
     gem_xtime_max=-1;
+    GEMTrkrsDeltaX = 999;
     gem_trk_hit=0;
     extrp_y=0;
     v_trd_y.clear();
@@ -450,7 +451,7 @@ void trdclass_halld24::Loop() {
         }
 				if (gt2_idx_x>0) {
         	for (ULong64_t i=0; i<gt2_idx_x; i++) {
-            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
+            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
             hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
             hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
         	}
