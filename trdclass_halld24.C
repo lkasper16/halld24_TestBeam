@@ -429,14 +429,7 @@ void trdclass_halld24::Loop() {
     } //-- End SRS Peak Loop
 
     // reject noise using trackers correlation
-    if (gt1_idx_x==1 && gt2_idx_x==1) {
-      GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
-      trkr_hit=1;
-      if (GEMTrkrsDeltaX > GEMTrkrsDeltaXCut) {
-        gt1_idx_x = 0;
-        gt2_idx_x = 0;
-      }
-    }
+    if (gt1_idx_x==1 && gt2_idx_x==1) trkr_hit=1;
     else {
       gt1_idx_x = 0;
       gt2_idx_x = 0;
@@ -457,6 +450,7 @@ void trdclass_halld24::Loop() {
         }
 				if (gt2_idx_x>0) {
         	for (ULong64_t i=0; i<gt2_idx_x; i++) {
+            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
             hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
             hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
         	}
