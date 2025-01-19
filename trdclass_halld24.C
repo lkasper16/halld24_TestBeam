@@ -213,7 +213,7 @@ void trdclass_halld24::Loop() {
   ULong64_t gt1_idx_x, gt1_idx_y;
   ULong64_t gt2_idx_x, gt2_idx_y;
   double GEMTrkrsDeltaX;
-  const double GEMTrkrsDeltaXCut = 4.0;
+  const double GEMTrkrsDeltaXCut = 9999999;
 
   //=================================================================
   //  Create GEM-TRD TTree of Hit Info for NN Rej Factor Calculation
@@ -263,6 +263,12 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM->Branch("a1nn",&a1nn);
     EVENT_VECT_GEM->Branch("ntr",&NTRACKS,"NTRACKS/I");
     EVENT_VECT_GEM->Branch("GEMTrkrsDeltaX",&GEMTrkrsDeltaX, "GEMTrkrsDeltaX/F");
+
+    // clone the GEM-TRD TTree for the GEM Trackers with new name
+    EVENT_VECT_GEM_TRACKERS = (TTree*)EVENT_VECT_GEM->CloneTree(0);
+    EVENT_VECT_GEM_TRACKERS->SetName("gem_trackers_hits");
+    EVENT_VECT_GEM_TRACKERS->SetTitle("GEM Trackers TTree with single track hit info");
+    EVENT_VECT_GEM_TRACKERS->SetDirectory(fHits);
   #endif
   
   //==============================================================================
@@ -291,6 +297,7 @@ void trdclass_halld24::Loop() {
     //-- Reset TTree Hit Info for each event
     gem_nhit=0;
     clu_nhit=0;
+    trkr_hit=0;
     gem_xpos.clear();
     gem_ypos.clear();
     gem_zpos.clear();
@@ -379,6 +386,7 @@ void trdclass_halld24::Loop() {
     // reject noise using trackers correlation
     if (gt1_idx_x==1 && gt2_idx_x==1) {
       GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
+      trkr_hit=1;
       if (GEMTrkrsDeltaX > GEMTrkrsDeltaXCut) {
         gt1_idx_x = 0;
         gt2_idx_x = 0;
@@ -925,6 +933,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
     //-- Fill GEM-TRD TTree of Hit Info
     #ifdef SAVE_TRACK_HITS
       if (gem_nhit>0) EVENT_VECT_GEM->Fill();
+      if (trkr_hit>0) EVENT_VECT_GEM_TRACKERS->Fill();
     #endif
   } //===================== End of Event Loop ===============================
   timer.Stop();
@@ -942,6 +951,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
     printf("Writing TTree Hit Info File... \n");
     fHits->cd();
     EVENT_VECT_GEM->Write();
+    EVENT_VECT_GEM_TRACKERS->Write();
     fHits->Close();
     printf("TTree file written & closed OK \n");
   #endif

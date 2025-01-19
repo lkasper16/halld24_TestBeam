@@ -306,10 +306,14 @@ public :
    
    //----- EVENT STRUCTURE -----
    TTree *EVENT_VECT_GEM;
+   TTree *EVENT_VECT_GEM_TRACKERS;
+
    //---------------------------
    int event_num;
    int gem_nhit;
+   int trkr_hit;
    int clu_nhit;
+   
    std::vector <int> gem_xpos;
    std::vector <int> gem_ypos;
    std::vector <float> gem_zpos;
@@ -373,7 +377,7 @@ trdclass_halld24::trdclass_halld24(int RunNum_in, int MaxEvt_in=0, int FirstEvt_
     chain = new TChain("events");
     printf("Chaining data files into TTree chain for Run %d \n",RunNum);
     chain->Add(chainFiles);
-    //chain->Print();
+   //  chain->Print();
     tree=chain;
   }
   
