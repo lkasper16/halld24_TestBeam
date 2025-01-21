@@ -1,6 +1,6 @@
 # cern24_TestBeam
 
-## Repository for CERN July 2024 TRD Test Beam
+## Repository for JLab Hall D March 2024 Large GEMTRD Test Beam
 
 Workflow on JLab Gluon compute nodes:   
 Log in to Gluon nodes with JLab computing account (must have 2FA)
@@ -19,9 +19,9 @@ After cloning repo, make directory links
 And use executable files for run analysis   
 ```
 ./trdclass_halld24.sh [$RUNNUMBER] [$MAXNUMBEROFEVENTS] [$FIRSTEVENT]  
-./trd_mlp_halld.sh [$RUNNUMBER]  
+./trd_mlp_halld24.sh [$RUNNUMBER]  
 ```
-With this workflow, raw .evio data files have already been processed into .root files that now live in the `ROOT/` directory. These .root data files are analyzed with the `trdclass_halld24.C` analysis macro. Output from there is saved in the `RootOutput/halld24` directory. The output from this in the form of a .root TTree file is passed on to `trd_mlp_halld.C` where a rejection factor calculation is done for different particle efficiencies. Output from this NN macro is saved in the `mlpOutput/halld24` directory. Run Numbers corresponding to the HallD 2024 test beam are in the 4000-4999 range.  
+With this workflow, raw .evio data files have already been processed into .root files that now live in the `ROOT/` directory. These .root data files are analyzed with the `trdclass_halld24.C` analysis macro. Output from there is saved in the `RootOutput/halld24` directory. The output from this in the form of a .root TTree file is passed on to `trd_mlp_halld24.C` where a rejection factor calculation is done for different particle efficiencies. Output from this NN macro is saved in the `mlpOutput/halld24` directory. Run Numbers corresponding to the HallD 2024 test beam are in the 4000-4999 range.  
 
 The [$FIRSTEVENT] option should not be less than one. For example, if you want to analyze the first 10K events in run 4123, you would use:  
 ```
