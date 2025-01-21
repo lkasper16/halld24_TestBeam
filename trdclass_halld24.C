@@ -243,7 +243,6 @@ void trdclass_halld24::Loop() {
   ULong64_t gt1_idx_x, gt1_idx_y;
   ULong64_t gt2_idx_x, gt2_idx_y;
   double GEMTrkrsDeltaX;
-  const double GEMTrkrsDeltaXCut = 9999999;
   double extrp_y;
   vector<double> v_trd_y;
   vector<bool> v_trk_xtime_coincidence;
@@ -296,7 +295,7 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM->Branch("a0nn",&a0nn);
     EVENT_VECT_GEM->Branch("a1nn",&a1nn);
     EVENT_VECT_GEM->Branch("ntr",&NTRACKS,"NTRACKS/I");
-    EVENT_VECT_GEM->Branch("GEMTrkrsDeltaX",&GEMTrkrsDeltaX, "GEMTrkrsDeltaX/F");
+    EVENT_VECT_GEM->Branch("GEMTrkrsDeltaX",&GEMTrkrsDeltaX);
 
     // clone the GEM-TRD TTree for the GEM Trackers with new name
     EVENT_VECT_GEM_TRACKERS = (TTree*)EVENT_VECT_GEM->CloneTree(0);
@@ -360,7 +359,7 @@ void trdclass_halld24::Loop() {
     gem_xamp_max =-1;
     gem_xch_max=-1;
     gem_xtime_max=-1;
-    GEMTrkrsDeltaX = 999;
+    GEMTrkrsDeltaX = 99999;
     gem_trk_hit=0;
     extrp_y=0;
     v_trd_y.clear();
@@ -430,7 +429,10 @@ void trdclass_halld24::Loop() {
     } //-- End SRS Peak Loop
 
     // reject noise using trackers correlation
-    if (gt1_idx_x==1 && gt2_idx_x==1) trkr_hit=1;
+    if (gt1_idx_x==1 && gt2_idx_x==1) {
+      trkr_hit=1;
+      GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[0], gemtrkr2_peak_pos_x[0]);
+      }
     else {
       gt1_idx_x = 0;
       gt2_idx_x = 0;
@@ -451,7 +453,6 @@ void trdclass_halld24::Loop() {
         }
 				if (gt2_idx_x>0) {
         	for (ULong64_t i=0; i<gt2_idx_x; i++) {
-            GEMTrkrsDeltaX = GetTrackersDeltaX(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
             hgemtrkr_double_x->Fill(gemtrkr1_peak_pos_x[j], gemtrkr2_peak_pos_x[i]);
             hgemtrkr_peak_delta_x->Fill(GEMTrkrsDeltaX);
         	}
