@@ -111,7 +111,7 @@ void trdclass_halld24::Loop() {
     std::ofstream csvFile(csvTitle);
   #endif
   TList *HistList = new TList();
-  int THRESH=150; //-- GEM-TRD ADC threshold
+  int THRESH=600; //-- GEM-TRD ADC threshold
   
   //========================================================================
   //            B o o k    H i s t o g r a m s
