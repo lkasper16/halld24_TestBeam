@@ -317,6 +317,8 @@ public :
 
    std::vector <int> gem_xpos;
    std::vector <int> gem_ypos;
+   std::vector <float> gem_ypos_amp;
+   std::vector <float> gem_ypos_time;
    std::vector <float> gem_zpos;
    std::vector <float> gem_dedx;
    //std::vector <int> gem_trackID;

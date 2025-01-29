@@ -261,6 +261,8 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM->Branch("nhit",&gem_nhit,"gem_nhit/I");
     EVENT_VECT_GEM->Branch("xpos",&gem_xpos);
     EVENT_VECT_GEM->Branch("ypos",&gem_ypos);
+    EVENT_VECT_GEM->Branch("ypos_amp",&gem_ypos_amp);
+    EVENT_VECT_GEM->Branch("ypos_time",&gem_ypos_time);
     EVENT_VECT_GEM->Branch("zpos",&gem_zpos);
     EVENT_VECT_GEM->Branch("dedx",&gem_dedx);
     EVENT_VECT_GEM->Branch("zHist",&gem_zHist_vect);
@@ -340,6 +342,8 @@ void trdclass_halld24::Loop() {
     trkr_hit=0;
     gem_xpos.clear();
     gem_ypos.clear();
+    gem_ypos_amp.clear();
+    gem_ypos_time.clear();
     gem_zpos.clear();
     gem_dedx.clear();
     gem_zHist->Reset();
@@ -525,6 +529,8 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
       // store gem-trd timing and track information
       if (gemChanY>-1 && amp>THRESH) {
         gem_ypos.push_back(gemChanY);
+        gem_ypos_amp.push_back(amp);
+        gem_ypos_time.push_back(time);
         if (gem_yamp_max<amp) {
           gem_yamp_max=amp;
           gem_ych_max=gemChanY;
