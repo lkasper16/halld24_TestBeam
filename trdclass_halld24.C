@@ -18,18 +18,18 @@
 #define NPRT 1000
 #define USE_TRK
 #define MAX_PRINT 1
-//#define USE_250_PULSE
-#define USE_125_RAW
+// #define USE_250_PULSE
+// #define USE_125_RAW
 #define BUFSIZE 128000
 #define DEBUG 0
 #define MAX_CLUST 500
 #define MAX_NODES 100
-#define USE_GNN    1
-#define USE_CLUST  1
-#define USE_FIT    1
+#define USE_GNN    0
+#define USE_CLUST  0
+#define USE_FIT    0
 #define SAVE_TRACK_HITS
 //#define WRITE_CSV
-#define SAVE_PDF
+// #define SAVE_PDF
 
 //-- For single evt clustering display, uncomment BOTH:
 // #define SHOW_EVT_DISPLAY
@@ -111,7 +111,8 @@ void trdclass_halld24::Loop() {
     std::ofstream csvFile(csvTitle);
   #endif
   TList *HistList = new TList();
-  int THRESH=600; //-- GEM-TRD ADC threshold
+  int THRESH=150; //-- GEM-TRD ADC threshold for 3439
+  // int THRESH=600; //-- GEM-TRD ADC threshold 4375, 4374
   
   //========================================================================
   //            B o o k    H i s t o g r a m s
@@ -254,8 +255,8 @@ void trdclass_halld24::Loop() {
 
   TFile* fHits; //-- Create output .root file to store GEM-TRD TTree for passing to NN
   #ifdef SAVE_TRACK_HITS
-    char hitsFileName[256]; sprintf(hitsFileName, "RootOutput/halld24/trd_singleTrackHits_Run_%06d.root", RunNum);
-    fHits = new TFile(hitsFileName, "RECREATE");
+    TString hitsFileName = output_file_name;
+    fHits = new TFile(hitsFileName.Data(), "RECREATE");
     EVENT_VECT_GEM = new TTree("gem_hits","GEM TTree with single track hit info");
     EVENT_VECT_GEM->Branch("event_num",&event_num,"event_num/I");
     EVENT_VECT_GEM->Branch("nhit",&gem_nhit,"gem_nhit/I");

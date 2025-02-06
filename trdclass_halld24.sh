@@ -19,7 +19,7 @@ fi
 
 echo "=========>  Process RUN=$RUNNUM FILE=$FILENUM <=========="
 
-root --web=off -l <<EOC
+root -l <<EOC
 .L trdclass_halld24.C+g
 trdclass_halld24 t(${RUNNUM},${MAXEVT},${FRSTEVT},${FILENUM})
 t.Loop()
