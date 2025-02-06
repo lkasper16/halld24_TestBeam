@@ -1,0 +1,7 @@
+run/
+RootOutput/
+ROOT
+*.root
+*.pcm
+*.d
+*.so

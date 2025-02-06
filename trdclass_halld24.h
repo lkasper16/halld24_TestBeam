@@ -268,6 +268,7 @@ public :
    TBranch        *b_gem_peak_real_pos;   //!
 
    trdclass_halld24(int RunNum, int MaxEvt, int FirstEvt, int FileNum);
+   trdclass_halld24(TString ROOTFilePath, TString fileName);
    virtual ~trdclass_halld24();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -280,6 +281,12 @@ public :
    void Count(const char *tit);
    void Count(const char *tit, double cut1);
    void Count(const char *tit, double cut1, double cut2);
+   void SetOutputFileName(TString name){
+      output_file_name = name;
+   }
+   TString GetOutputFileName(){
+      return output_file_name;
+   }
    
    //==================  histograms ========================
   
@@ -355,7 +362,10 @@ public :
    std::vector <int> nytrkr1;
    std::vector <int> nxtrkr2;
    std::vector <int> nytrkr2;
-   
+
+private:
+   TString output_file_name;
+   TFile *fOut;
    //=============================================
 };
 
@@ -400,6 +410,29 @@ trdclass_halld24::trdclass_halld24(int RunNum_in, int MaxEvt_in=0, int FirstEvt_
       }   
       f->GetObject("events",tree);
    }
+   SetOutputFileName(Form("RootOutput/halld24/Run_%06d_Output.root",RunNum));
+   Init(tree);
+}
+
+trdclass_halld24::trdclass_halld24(TString ROOTFilePath, TString fileName) : fChain(0)
+{
+  TTree *tree=NULL;
+  
+  printf("============ trdclass constructor single root input file %s ============\n",fileName.Data());
+
+  cout << "Opening file " << ROOTFilePath+fileName << endl;
+  TFile *f = new TFile(ROOTFilePath+fileName);
+   if (!f) {
+      cout << "File " << ROOTFilePath+fileName << " not found" << endl;
+      return;
+   }
+
+   tree = (TTree*)f->Get("events");
+   TString out_name = "out_hits_";
+   out_name += fileName;
+   SetOutputFileName(out_name);
+   cout << "entries on the chain = " << tree->GetEntries() << endl;
+   cout << "Output file name = " << out_name << endl;
    Init(tree);
 }
 
@@ -725,6 +758,7 @@ void  trdclass_halld24::Count(const char *tit, double cut1, double cut2) {
   sprintf(clab,"%s_%.1f_%.1f",tit,cut1,cut2);
   hcount->Fill(clab,1);
 }
+
 //------------------------------------------------------------------
 
 
