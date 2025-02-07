@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 # This script generates useful links (to DATA, ROOT and other directories) for ifarm machines
 ln -s /volatile/halld/home/nseptian/TRDROOT ROOT
+ln -s /volatile/halld/home/nseptian/TRDRootOutput TRDRootOutput
 mkdir RootOutput
 
 

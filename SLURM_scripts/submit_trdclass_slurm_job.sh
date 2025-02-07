@@ -21,7 +21,7 @@ INPUT_FILES=($(ls Run_00${RUNNUMBER}_*.root))
 # INPUT_FILES=($(ls Run_00${RUNNUMBER}_001.root))
 
 # Create a cancel script
-CANCEL_SCRIPT="/work/halld2/home/nseptian/halld24_TestBeam/cancel_trdclass_jobs_${RUNNUMBER}.sh"
+CANCEL_SCRIPT="/work/halld2/home/nseptian/halld24_TestBeam/SLURM_scripts/cancel_trdclass_jobs_${RUNNUMBER}.sh"
 echo "#!/bin/bash" > $CANCEL_SCRIPT
 
 # Loop through each input file and create a separate job script
@@ -60,3 +60,4 @@ EOT
 done
 
 chmod +x $CANCEL_SCRIPT
+

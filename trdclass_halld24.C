@@ -111,7 +111,7 @@ void trdclass_halld24::Loop() {
     std::ofstream csvFile(csvTitle);
   #endif
   TList *HistList = new TList();
-  int THRESH=150; //-- GEM-TRD ADC threshold for 3439
+  int THRESH=350; //-- GEM-TRD ADC threshold for 3439
   // int THRESH=600; //-- GEM-TRD ADC threshold 4375, 4374
   
   //========================================================================
@@ -613,7 +613,7 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
           Count("gem_trk_hit");
           bool tcoin=false;
           for (int it=0; it<nxpulse; it++){
-            if (abs(time-gem_xtime[it])<10) tcoin=true; //-- if time between hits is less than 10 time samples, time coincidence is TRUE
+            if (abs(time-gem_xtime[it])<5) tcoin=true; //-- if time between hits is less than 10 time samples, time coincidence is TRUE
           }
           v_trk_ytime_coincidence.push_back(tcoin);
           if (!match) {

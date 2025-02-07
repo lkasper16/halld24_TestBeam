@@ -410,7 +410,7 @@ trdclass_halld24::trdclass_halld24(int RunNum_in, int MaxEvt_in=0, int FirstEvt_
       }   
       f->GetObject("events",tree);
    }
-   SetOutputFileName(Form("RootOutput/halld24/Run_%06d_Output.root",RunNum));
+   SetOutputFileName(Form("RootOutput/halld24/trd_singleTrackHits_Run_%06d.root",RunNum));
    Init(tree);
 }
 
