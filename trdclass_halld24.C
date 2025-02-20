@@ -111,7 +111,7 @@ void trdclass_halld24::Loop() {
     std::ofstream csvFile(csvTitle);
   #endif
   TList *HistList = new TList();
-  int THRESH=350; //-- GEM-TRD ADC threshold for 3439
+  int THRESH=150; //-- GEM-TRD ADC threshold for 3439
   // int THRESH=600; //-- GEM-TRD ADC threshold 4375, 4374
   
   //========================================================================
@@ -248,6 +248,18 @@ void trdclass_halld24::Loop() {
   vector<double> v_trd_y;
   vector<bool> v_trk_xtime_coincidence;
   vector<bool> v_trk_ytime_coincidence;
+  vector<int> v_tcoin_xpos;
+  vector<float> v_tcoin_xpos_time;
+  vector<float> v_tcoin_xpos_amp;
+  vector<int> v_tcoin_ypos;
+  vector<float> v_tcoin_ypos_time;
+  vector<float> v_tcoin_ypos_amp;
+  vector<int> v_pulsecut_xpos;
+  vector<float> v_pulsecut_xpos_time;
+  vector<float> v_pulsecut_xpos_amp;
+  vector<int> v_pulsecut_ypos;
+  vector<float> v_pulsecut_ypos_time;
+  vector<float> v_pulsecut_ypos_amp;
 
   //=================================================================
   //  Create GEM-TRD TTree of Hit Info for NN Rej Factor Calculation
@@ -310,8 +322,20 @@ void trdclass_halld24::Loop() {
     EVENT_VECT_GEM_TRACKERS->Branch("extrp_y", &extrp_y);
     // TRD hit position relative to the beam line
     EVENT_VECT_GEM_TRACKERS->Branch("v_trd_y", &v_trd_y);
-    EVENT_VECT_GEM_TRACKERS->Branch("trk_xtime_coincidence", &v_trk_xtime_coincidence);
-    EVENT_VECT_GEM_TRACKERS->Branch("trk_ytime_coincidence", &v_trk_ytime_coincidence);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_trk_xtime_coincidence", &v_trk_xtime_coincidence);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_trk_ytime_coincidence", &v_trk_ytime_coincidence);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_xpos", &v_tcoin_xpos);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_xpos_time", &v_tcoin_xpos_time);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_xpos_amp", &v_tcoin_xpos_amp);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_ypos", &v_tcoin_ypos);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_ypos_time", &v_tcoin_ypos_time);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_tcoin_ypos_amp", &v_tcoin_ypos_amp);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_xpos", &v_pulsecut_xpos);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_xpos_time", &v_pulsecut_xpos_time);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_xpos_amp", &v_pulsecut_xpos_amp);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_ypos", &v_pulsecut_ypos);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_ypos_time", &v_pulsecut_ypos_time);
+    EVENT_VECT_GEM_TRACKERS->Branch("v_pulsecut_ypos_amp", &v_pulsecut_ypos_amp);
   #endif
   
   //==============================================================================
@@ -370,6 +394,18 @@ void trdclass_halld24::Loop() {
     v_trd_y.clear();
     v_trk_xtime_coincidence.clear();
     v_trk_ytime_coincidence.clear();
+    v_tcoin_xpos.clear();
+    v_tcoin_xpos_time.clear();
+    v_tcoin_xpos_amp.clear();
+    v_tcoin_ypos.clear();
+    v_tcoin_ypos_time.clear();
+    v_tcoin_ypos_amp.clear();
+    v_pulsecut_xpos.clear();
+    v_pulsecut_xpos_time.clear();
+    v_pulsecut_xpos_amp.clear();
+    v_pulsecut_ypos.clear();
+    v_pulsecut_ypos_time.clear();
+    v_pulsecut_ypos_amp.clear();
     
     int gem_xtime[f125_pulse_count];
     int gem_ytime[f125_pulse_count];
@@ -613,7 +649,17 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
           Count("gem_trk_hit");
           bool tcoin=false;
           for (int it=0; it<nxpulse; it++){
-            if (abs(time-gem_xtime[it])<5) tcoin=true; //-- if time between hits is less than 10 time samples, time coincidence is TRUE
+            if (abs(time-gem_xtime[it])<2) {
+              tcoin=true;
+              v_tcoin_ypos.push_back(gemChanY);
+              v_tcoin_ypos_time.push_back(time);
+              v_tcoin_ypos_amp.push_back(amp);
+              if (TMath::Abs(gemChanY-gem_ych_max)<5) {
+                v_pulsecut_ypos.push_back(gemChanY);
+                v_pulsecut_ypos_time.push_back(time);
+                v_pulsecut_ypos_amp.push_back(amp);
+              }
+            } //-- if time between hits is less than 10 time samples, time coincidence is TRUE
           }
           v_trk_ytime_coincidence.push_back(tcoin);
           if (!match) {
@@ -636,7 +682,17 @@ for (ULong64_t i=0; i<f125_pulse_count; i++) {
       if (gemChanX>-1 && amp>THRESH) {
         bool tcoin=false;
         for (int it=0; it<nypulse; it++){
-          if (abs(time-gem_ytime[it])<5) tcoin=true;
+          if (abs(time-gem_ytime[it])<2) {
+            tcoin=true;
+            v_tcoin_xpos.push_back(gemChanX);
+            v_tcoin_xpos_time.push_back(time);
+            v_tcoin_xpos_amp.push_back(amp);
+            if (TMath::Abs(gemChanX-gem_xch_max)<5) {
+              v_pulsecut_xpos.push_back(gemChanX);
+              v_pulsecut_xpos_time.push_back(time);
+              v_pulsecut_xpos_amp.push_back(amp);
+            }
+          }
         }
         v_trk_xtime_coincidence.push_back(tcoin);
         if (tcoin) {
